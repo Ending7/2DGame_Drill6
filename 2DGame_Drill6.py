@@ -8,22 +8,29 @@ hand_arrow = load_image('hand_arrow.png')
 tuk_Ground = load_image("TUK_GROUND.png")
 
 index, t = 0 ,0
+select = -1
 motion = 0
 playerX, playerY = tuk_width  // 2, tuk_height // 2
-routeX, routeY = tuk_width  // 2, tuk_height// 2
+route = list()
 running = True
 
+def draw_arrow():
+    global route
+    for routeX, routeY in route:
+        hand_arrow.draw(routeX,routeY)
+
 def player_move():
-    global playerX, playerY, routeX, routeY, t
-               
+    global playerX, playerY, route, t, select
+    routeX, routeY = route[0]
     playerX = (1-t) * playerX + t * routeX
     playerY = (1-t) * playerY + t * routeY
-    t += 0.1
+    t += 0.05
     if playerX == routeX:
         t = 0
     
 def player_motion():
-    global motion
+    global motion, route
+    routeX, routeY = route[0]
     if(playerX > routeX):
         motion = 0
     elif(playerX < routeX):
@@ -48,10 +55,10 @@ def draw(frame):
        player.clip_composite_draw(frameX,frameY,width,height, 0, 'h', playerX, playerY, 100,150)
 
     if motion == 1:
-       player.clip_draw(frameX,frameY, width, height, playerX, playerY,100 , 150)
+       player.clip_draw(frameX,frameY, width, height, playerX, playerY, 100 , 150)
 
 def handle_events():
-    global running,routeX,routeY
+    global running,route,select
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -59,20 +66,26 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             running = False
         elif event.type == SDL_MOUSEBUTTONDOWN:
-            routeX, routeY = event.x, tuk_height -1 - event.y
+            temp = (event.x, tuk_height -1 - event.y)
+            route.append(temp)
+            select+=1
 
 
 while running:
+
     clear_canvas()
     tuk_Ground.draw(tuk_width//2,tuk_height//2)
 
-    hand_arrow.draw(routeX,routeY)
-    player_move()
-    player_motion()
     player_run()
+    draw_arrow()
     update_canvas()
-
+    
     handle_events()
+    if(select >= 0):     
+       player_move()
+       player_motion()
+      
+    
     delay(0.05)
 
     if not running: 
