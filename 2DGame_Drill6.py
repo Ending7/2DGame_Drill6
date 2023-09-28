@@ -10,25 +10,17 @@ tuk_Ground = load_image("TUK_GROUND.png")
 index, t = 0 ,0
 motion = 0
 playerX, playerY = tuk_width  // 2, tuk_height // 2
-routeX, routeY = 0, 0
-lock = True
+routeX, routeY = tuk_width  // 2, tuk_height// 2
 running = True
 
-def make_route():
-    global routeX, routeY, lock
-    routeX = random.randint(100,1100)
-    routeY = random.randint(100,1000)
-    lock = False
-
 def player_move():
-    global playerX, playerY, routeX, routeY, t, lock
+    global playerX, playerY, routeX, routeY, t
                
     playerX = (1-t) * playerX + t * routeX
     playerY = (1-t) * playerY + t * routeY
     t += 0.1
     if playerX == routeX:
         t = 0
-        lock = True
     
 def player_motion():
     global motion
@@ -59,20 +51,20 @@ def draw(frame):
        player.clip_draw(frameX,frameY, width, height, playerX, playerY,100 , 150)
 
 def handle_events():
-    global running
+    global running,routeX,routeY
     events = get_events()
     for event in events:
-    	if event.type == SDL_QUIT:
-    		running = False
-    	elif event.type == SDL_KEYDOWN:
-    		running = False
+        if event.type == SDL_QUIT:
+            running = False
+        elif event.type == SDL_KEYDOWN:
+            running = False
+        elif event.type == SDL_MOUSEBUTTONDOWN:
+            routeX, routeY = event.x, tuk_height -1 - event.y
+
 
 while running:
     clear_canvas()
     tuk_Ground.draw(tuk_width//2,tuk_height//2)
-
-    if lock == True:
-      make_route()
 
     hand_arrow.draw(routeX,routeY)
     player_move()
